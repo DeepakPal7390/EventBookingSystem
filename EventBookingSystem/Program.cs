@@ -1,5 +1,7 @@
 
 using EventBookingSystem.Data;
+using EventBookingSystem.Repositories;
+using EventBookingSystem.Services;
 using Microsoft.EntityFrameworkCore;
 namespace EventBookingSystem
 {
@@ -16,7 +18,9 @@ namespace EventBookingSystem
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddDbContext<EventDbContext>(optins=> optins.UseSqlServer(builder.Configuration.GetConnectionString("EventConnectionString")));
+            builder.Services.AddDbContext<EventDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("EventConnectionString")));
+            builder.Services.AddScoped<IEventRepositories, EventRepositories>();
+            builder.Services.AddScoped<IEventService, EventService>();
 
             var app = builder.Build();
 
