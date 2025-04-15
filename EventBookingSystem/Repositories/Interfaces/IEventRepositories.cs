@@ -1,6 +1,6 @@
 ﻿using EventBookingSystem.Models.Domain;
 
-namespace EventBookingSystem.Repositories
+namespace EventBookingSystem.Repositories.Interfaces
 {
     public interface IEventRepositories
     {

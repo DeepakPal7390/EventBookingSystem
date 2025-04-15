@@ -1,5 +1,6 @@
 ﻿using EventBookingSystem.Models.Domain;
-using EventBookingSystem.Services;
+using EventBookingSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,10 +30,12 @@ namespace EventBookingSystem.Controllers
             if (ev == null) return NotFound();
             return Ok(ev);
         }
-
+        //[Authorize (Roles = "admin")]
+        [Authorize (Policy ="AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Event ev)
         {
+           
             var created = await _eventService.AddAsync(ev);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }

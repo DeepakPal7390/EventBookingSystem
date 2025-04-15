@@ -1,8 +1,9 @@
 ﻿using EventBookingSystem.Data;
 using EventBookingSystem.Models.Domain;
+using EventBookingSystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventBookingSystem.Repositories
+namespace EventBookingSystem.Repositories.Implementation
 {
     public class EventRepositories : IEventRepositories
     {

@@ -1,6 +1,6 @@
 ﻿using EventBookingSystem.Models.Domain;
 
-namespace EventBookingSystem.Services
+namespace EventBookingSystem.Services.Interfaces
 {
     public interface IEventService
     {

@@ -1,7 +1,8 @@
 ﻿using EventBookingSystem.Models.Domain;
-using EventBookingSystem.Repositories;
+using EventBookingSystem.Repositories.Interfaces;
+using EventBookingSystem.Services.Interfaces;
 
-namespace EventBookingSystem.Services
+namespace EventBookingSystem.Services.Implementation
 {
     public class EventService : IEventService
     {    private readonly IEventRepositories _eventRepositories;
