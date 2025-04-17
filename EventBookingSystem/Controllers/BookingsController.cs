@@ -1,38 +1,49 @@
-﻿using EventBookingSystem.Models.Domain;
-using EventBookingSystem.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using EventBookingSystem.Services.Interfaces;
 
 namespace EventBookingSystem.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class BookingsController : ControllerBase
+    [Route("api/[controller]")]
+    public class BookingController : ControllerBase
     {
         private readonly IBookingService _bookingService;
 
-        public BookingsController(IBookingService bookingService)
+        public BookingController(IBookingService bookingService)
         {
             _bookingService = bookingService;
         }
 
-        
-        [HttpPost]
-        public async Task<IActionResult> AddBooking([FromBody] Booking booking)
+        [Authorize]
+        [HttpPost("{eventId}")]
+        public async Task<IActionResult> BookTicket(Guid eventId)
         {
-            var createdBooking = await _bookingService.AddBookingAsync(booking);
-            //return CreatedAtAction(nameof(GetById), new { id = createdBooking.Id }, createdBooking);
-            return CreatedAtAction("", createdBooking);
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
 
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("Invalid token: userId not found.");
+
+            var result = await _bookingService.BookTicketAsync(eventId, userId);
+            return Ok(result);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBooking(Guid id)
+        [Authorize]
+        [HttpDelete("cancel")]
+        public async Task<IActionResult> CancelBooking([FromQuery] Guid eventId)
         {
-            var result = await _bookingService.DeleteBookingAsync(id);
-            if (!result) return NotFound();
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("Invalid token: userId not found.");
 
-            return NoContent();
+            var result = await _bookingService.CancelBookingAsync(userId, eventId);
+            return Ok(result);
         }
+
     }
 }
+
+

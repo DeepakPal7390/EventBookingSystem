@@ -1,117 +1,4 @@
 
-//using EventBookingSystem.Data;
-//using EventBookingSystem.Repositories.Implementation;
-//using EventBookingSystem.Repositories.Interfaces;
-//using EventBookingSystem.Services.Implementation;
-//using EventBookingSystem.Services.Interfaces;
-//using Microsoft.EntityFrameworkCore;
-
-//// Start impliment Jwt authentication
-//using EventBookingSystem.Middleware;
-//using Microsoft.AspNetCore.Authentication.JwtBearer;
-
-
-//using Microsoft.IdentityModel.Tokens;
-//using System.Text;
-
-
-//namespace EventBookingSystem
-//{
-//    public class Program
-//    {
-//        public static void Main(string[] args)
-//        {
-//            var builder = WebApplication.CreateBuilder(args);
-
-//            // Add services to the container.
-
-//            builder.Services.AddControllers();
-//            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-//            builder.Services.AddEndpointsApiExplorer();
-//            builder.Services.AddSwaggerGen();
-
-//            builder.Services.AddDbContext<EventDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("EventConnectionString")));
-//            builder.Services.AddScoped<IEventRepositories, EventRepositories>();
-//            builder.Services.AddScoped<IEventService, EventService>();
-//            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
-//            builder.Services.AddScoped<IBookingService, BookingService>();
-//            builder.Services.AddScoped<IAuthService, AuthService>();
-//            builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-//            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateLifetime = true,
-//            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//            ValidAudience = builder.Configuration["Jwt:Audience"],
-//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]))
-//        };
-//    });
-
-
-//            builder.Services.AddSwaggerGen(options =>
-//            {
-//                options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-//                {
-//                    Name = "Authorization",
-//                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-//                    Scheme = "Bearer",
-//                    BearerFormat = "JWT",
-//                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-//                    Description = "Enter 'Bearer' [space] and then your valid token.\n\nExample: Bearer {token}\"",
-//                });
-
-//                options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-//    {
-//        {
-//            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-//            {
-//                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-//                {
-//                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            Array.Empty<string>()
-//        }
-//    });
-//            });
-
-
-
-
-
-//            var app = builder.Build();
-
-//            // Configure the HTTP request pipeline.
-//            if (app.Environment.IsDevelopment())
-//            {
-//                app.UseSwagger();
-//                app.UseSwaggerUI();
-//            }
-
-//            app.UseHttpsRedirection();
-//            app.UseMiddleware<JwtMiddleware>();
-//            app.UseAuthentication();
-//            app.UseAuthorization();
-
-
-//            app.MapControllers();
-
-//            app.Run();
-//        }
-//    }
-//}
-
-
-
-// new
-
-
 using EventBookingSystem.Data;
 using EventBookingSystem.Repositories.Implementation;
 using EventBookingSystem.Repositories.Interfaces;
@@ -124,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using EventBookingSystem.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace EventBookingSystem
 {
@@ -131,10 +19,23 @@ namespace EventBookingSystem
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
-            string publicKeyText = File.ReadAllText("Keys/public.pem");
+           
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
-            // Add services to the container.
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "CustomJwt";
+                options.DefaultChallengeScheme = "CustomJwt";
+            }).AddScheme<AuthenticationSchemeOptions, PassThroughAuthenticationHandler>("CustomJwt", null);
+            builder.Services.AddSingleton<JwtSecurityTokenHandlerWrapper>();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
+            });
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
@@ -173,20 +74,7 @@ namespace EventBookingSystem
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IBookingRepository, BookingRepository>();
             builder.Services.AddScoped<IBookingService, BookingService>();
-            builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-            // Register custom JWT validation components
-            builder.Services.AddSingleton<JwtSecurityTokenHandlerWrapper>();
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
-            });
-
-            // Register custom authentication handler (pass-through based on context)
-            builder.Services
-                .AddAuthentication("CustomScheme")
-                .AddScheme<AuthenticationSchemeOptions, PassThroughAuthenticationHandler>("CustomScheme", null);
 
             var app = builder.Build();
 
@@ -199,8 +87,8 @@ namespace EventBookingSystem
 
             app.UseHttpsRedirection();
 
-            app.UseMiddleware<JwtMiddleware>(); // Custom JWT validation
-            app.UseAuthentication();            // Use our custom scheme
+            app.UseMiddleware<JwtMiddleware>(); 
+            app.UseAuthentication();            
             app.UseAuthorization();
 
             app.MapControllers();

@@ -16,13 +16,14 @@ namespace EventBookingSystem.Controllers
         {
             _eventService = eventService;
         }
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var events = await _eventService.GetAllAsync();
             return Ok(events);
         }
-
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -39,7 +40,7 @@ namespace EventBookingSystem.Controllers
             var created = await _eventService.AddAsync(ev);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
-
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Event ev)
         {
@@ -48,6 +49,7 @@ namespace EventBookingSystem.Controllers
             return Ok(updated);
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

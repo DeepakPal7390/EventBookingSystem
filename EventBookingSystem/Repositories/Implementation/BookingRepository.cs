@@ -1,33 +1,44 @@
-﻿using EventBookingSystem.Data;
+﻿using System.Threading.Tasks;
+using EventBookingSystem.Data;
+using EventBookingSystem.Models;
 using EventBookingSystem.Models.Domain;
 using EventBookingSystem.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventBookingSystem.Repositories.Implementation
 {
     public class BookingRepository : IBookingRepository
     {
-        private readonly EventDbContext dbContext;
+        private readonly EventDbContext _context;
 
-        public BookingRepository(EventDbContext dbContext)
+        public BookingRepository(EventDbContext context)
         {
-            this.dbContext = dbContext;
-        }
-        public async Task<Booking> AddAsync(Booking booking)
-        {
-            await dbContext.Bookings.AddAsync(booking);
-            await dbContext.SaveChangesAsync();
-            return booking;
+            _context = context;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task AddAsync(Booking booking)
         {
-            var existing = await dbContext.Bookings.FindAsync(id);
-            if (existing == null) return false;
-
-            dbContext.Bookings.Remove(existing);
-
-            await dbContext.SaveChangesAsync();
-            return true;
+            _context.Bookings.Add(booking);
+            await _context.SaveChangesAsync();
         }
+
+        public async Task<Booking?> GetByUserAndEventAsync(string userId, Guid eventId)
+        {
+            return await _context.Bookings
+                                 .FirstOrDefaultAsync(b => b.UserId == userId && b.EventId == eventId);
+        }
+
+        public async Task DeleteAsync(Guid bookingId)
+        {
+            var booking = await _context.Bookings.FindAsync(bookingId);
+            if (booking != null)
+            {
+                _context.Bookings.Remove(booking);
+                await _context.SaveChangesAsync();
+            }
+        }
+
     }
 }
+
+

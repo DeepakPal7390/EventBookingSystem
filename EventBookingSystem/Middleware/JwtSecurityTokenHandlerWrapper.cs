@@ -16,17 +16,17 @@ namespace EventBookingSystem.Middleware
         {
             _logger = logger;
             var publicKeyPath = Path.Combine(Directory.GetCurrentDirectory(), "Keys", "public.pem");
-            _logger.LogInformation("🔑 Reading public key from: {PublicKeyPath}", publicKeyPath);
+            _logger.LogInformation(" Reading public key from: {PublicKeyPath}", publicKeyPath);
             var publicKeyText = File.ReadAllText(publicKeyPath);
             _rsa = RSA.Create();
             try
             {
                 _rsa.ImportFromPem(publicKeyText.ToCharArray());
-                _logger.LogInformation("✅ Public key imported successfully.");
+                _logger.LogInformation("Public key imported successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Failed to import public key from {PublicKeyPath}", publicKeyPath);
+                _logger.LogError(ex, " Failed to import public key from {PublicKeyPath}", publicKeyPath);
                 throw;
             }
         }
@@ -48,12 +48,12 @@ namespace EventBookingSystem.Middleware
             try
             {
                 var principal = handler.ValidateToken(token, validationParameters, out var securityToken);
-                _logger.LogInformation("✅ Token validated successfully");
+                _logger.LogInformation("Token validated successfully");
                 return principal;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Token validation failed");
+                _logger.LogError(ex, "Token validation failed");
                 throw;
             }
         }
