@@ -5,9 +5,8 @@ namespace EventBookingSystem.Services.Interfaces
 {
     public interface IBookingService
     {
-        Task<string> BookTicketAsync(Guid eventId, string userId);
-        //Task<string> CancelBookingAsync(Guid bookingId, string userId);
-        Task<string> CancelBookingAsync(string userId, Guid eventId);
+        Task<Guid> BookTicketAsync(Guid eventId, string userId);
+        Task CancelBookingAsync(string userId, Guid eventId);
 
     }
 }

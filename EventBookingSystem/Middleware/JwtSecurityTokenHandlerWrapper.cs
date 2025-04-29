@@ -1,5 +1,4 @@
-﻿// Middlewares/JwtSecurityTokenHandlerWrapper.cs
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Text;

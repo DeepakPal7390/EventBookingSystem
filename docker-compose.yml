@@ -1,0 +1,35 @@
+
+services:
+  eventbookingsystem:
+    image: eventbookingsystem
+    build:
+      context: .
+      dockerfile: EventBookingSystem/Dockerfile
+    environment:
+      - ConnectionStrings__EventConnectionString=${EVENT_CONNECTION_STRING}
+      - ConnectionStrings__Redis=${REDIS_CONNECTION_STRING}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+      - redis
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=${ACCEPT_EULA}
+      - SA_PASSWORD=${SA_PASSWORD}
+    ports:
+      - "1433:1433"
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+
+
+
+

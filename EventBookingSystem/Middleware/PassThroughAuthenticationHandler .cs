@@ -1,5 +1,4 @@
-﻿// Middlewares/CustomAuthenticationHandler.cs
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Encodings.Web;
@@ -19,7 +18,6 @@ namespace EventBookingSystem.Middleware
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            // JwtMiddleware sets HttpContext.User; just pass through
             if (Context.User?.Identity?.IsAuthenticated == true)
             {
                 return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(Context.User, Scheme.Name)));
